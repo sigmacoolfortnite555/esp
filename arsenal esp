@@ -1,0 +1,47 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Function to create a BoxHandleAdornment
+local function createBoxHandleAdornment(parent)
+    local adornment = Instance.new("BoxHandleAdornment")
+    adornment.Adornee = parent
+    adornment.AlwaysOnTop = true -- Makes the adornment visible through walls
+    adornment.ZIndex = 10 -- Higher ZIndex to render on top of other UI elements
+    adornment.Color3 = Color3.new(1, 0, 0) -- Red color
+    adornment.Size = parent.Size + Vector3.new(0.1, 0.1, 0.1) -- Slightly larger than the part
+    adornment.Transparency = 0.5
+    adornment.Parent = parent
+    return adornment
+end
+
+-- Function to update adornments
+local function updateAdornments()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local existingAdornment = character:FindFirstChild("BoxHandleAdornment")
+                if not existingAdornment then
+                    createBoxHandleAdornment(character.HumanoidRootPart)
+                end
+            end
+        end
+    end
+end
+
+-- Update adornments when a new player is added
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        if player ~= LocalPlayer and character:FindFirstChild("HumanoidRootPart") then
+            createBoxHandleAdornment(character.HumanoidRootPart)
+        end
+    end)
+end)
+
+-- Update adornments when the local player's character respawns
+LocalPlayer.CharacterAdded:Connect(function()
+    updateAdornments()
+end)
+
+-- Initial setup
+updateAdornments()
